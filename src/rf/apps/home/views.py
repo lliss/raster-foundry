@@ -4,9 +4,12 @@ from __future__ import unicode_literals
 from __future__ import division
 
 import json
+import boto
 
 from django.contrib.auth.models import User
 from django.shortcuts import render_to_response
+from django.core.urlresolvers import reverse
+
 from rest_framework import serializers, viewsets
 
 from django.conf import settings
@@ -31,9 +34,12 @@ def home_page(request):
 
 
 def get_client_settings():
+    conn = boto.connect_s3(profile_name=settings.AWS_PROFILE)
+    aws_key = conn.aws_access_key_id
+
     client_settings = json.dumps({
-        'signerUrl': settings.CLIENT_SETTINGS['signer_url'],
-        'awsKey': settings.CLIENT_SETTINGS['aws_key'],
-        'awsBucket': settings.CLIENT_SETTINGS['aws_bucket'],
+        'signerUrl': reverse('sign_request'),
+        'awsKey': aws_key,
+        'awsBucket': settings.AWS_BUCKET_NAME,
     })
     return client_settings
